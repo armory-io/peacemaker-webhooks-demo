@@ -1,0 +1,30 @@
+name: Context Returned Webhook Callback
+
+on:
+  repository_dispatch:
+    types: respondWithContextCallback
+
+jobs:
+  respond:
+    name: Calls the callback being passed in
+    runs-on: ubuntu-latest
+    steps:
+      - name: getToken
+        id: getToken
+        uses: fjogeleit/http-request-action@master
+        with:
+          url: "https://auth.staging.cloud.armory.io/oauth/token"
+          method: "POST"
+          customHeaders: '{ "Content-Type": "application/x-www-form-urlencoded" }'
+          data: 'audience=https://api.staging.cloud.armory.io&grant_type=client_credentials&client_id=${{ secrets.ARMORY_STAGING_CLIENT_ID }}&client_secret=${{ secrets.ARMORY_STAGING_CLIENT_SECRET }}'
+      - name: executeDeploymentCallback
+        id: executeDeploymentCallback
+        uses: fjogeleit/http-request-action@master
+        with:
+          url: ${{ github.event.client_payload.callbackUri }}
+          method: 'POST'
+          bearerToken: ${{ fromJSON(steps.getToken.outputs.response).access_token }}
+          customHeaders: '{ "Content-Type": "application/json" }'
+          data: '{ "success": true,  "mdMessage": "{\"accountName\": \"${{ github.event.client_payload.accountName }}\", \"environmentName\": \"${{ github.event.client_payload.environmentName }}\", \"namespace\": \"${{ github.event.client_payload.namespace }}\", \"applicationName\": \"${{ github.event.client_payload.applicationName }}\", \"replicaSetName\": \"${{ github.event.client_payload.replicaSetName }}\"}"}'
+      - name: show http response
+        run: echo ${{ steps.executeDeploymentCallback.outputs.response }}
