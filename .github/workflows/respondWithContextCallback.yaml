@@ -25,6 +25,6 @@ jobs:
           method: 'POST'
           bearerToken: ${{ fromJSON(steps.getToken.outputs.response).access_token }}
           customHeaders: '{ "Content-Type": "application/json" }'
-          data: '{ "success": ${{ github.event.client_payload.outcome }},  "mdMessage": "{\"accountName\": \"${{ github.event.client_payload.accountName }}\", \"environmentName\": \"${{ github.event.client_payload.environmentName }}\", \"namespace\": \"${{ github.event.client_payload.namespace }}\", \"applicationName\": \"${{ github.event.client_payload.applicationName }}\", \"replicaSetName\": \"${{ github.event.client_payload.replicaSetName }}\"}"}'
+          data: '{ "success": ${{ github.event.client_payload.success }},  "mdMessage": "{\"accountName\": \"${{ github.event.client_payload.accountName }}\", \"environmentName\": \"${{ github.event.client_payload.environmentName }}\", \"namespace\": \"${{ github.event.client_payload.namespace }}\", \"applicationName\": \"${{ github.event.client_payload.applicationName }}\", \"replicaSetName\": \"${{ github.event.client_payload.replicaSetName }}\"}"}'
       - name: show http response
         run: echo ${{ steps.executeDeploymentCallback.outputs.response }}
